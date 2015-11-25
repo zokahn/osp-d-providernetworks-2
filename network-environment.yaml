@@ -42,4 +42,4 @@ parameter_defaults:
   DnsServers: ['.15.200', '.55.200']
 
   # The bonding mode to use for the bonds
-  BondInterfaceOvsOptions: "bond_mode=balance-slb"
+  BondInterfaceOvsOptions: "bond_mode=balance-tcp lacp=active other-config:lacp-fallback-ab=true"
