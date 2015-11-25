@@ -1,0 +1,45 @@
+# Enable the creation of Neutron networks for isolated Overcloud
+# traffic and configure each role to assign ports (related
+# to that role) on these networks.
+resource_registry:
+  OS::TripleO::Network::External: /home/stack/my_templates/network/external.yaml
+  OS::TripleO::Network::InternalApi: /home/stack/my_templates/network/internal_api.yaml
+
+  # Port assignments for the VIPs
+  OS::TripleO::Network::Ports::ExternalVipPort: /home/stack/my_templates/network/ports/vip.yaml
+  OS::TripleO::Network::Ports::InternalApiVipPort: /home/stack/my_templates/network/ports/vip.yaml
+  OS::TripleO::Controller::Ports::RedisVipPort: /home/stack/my_templates/network/ports/vip.yaml
+
+  # Port assignments for the controller role
+  OS::TripleO::Controller::Ports::ExternalPort: /home/stack/my_templates/network/ports/external.yaml
+  OS::TripleO::Controller::Ports::InternalApiPort: /home/stack/my_templates/network/ports/internal_api.yaml
+
+  # Port assignments for the compute role
+  OS::TripleO::Compute::Ports::InternalApiPort: /home/stack/my_templates/network/ports/internal_api.yaml
+
+  # NIC Configs for our roles
+  OS::TripleO::Compute::Net::SoftwareConfig: /home/stack/my_templates/nic-configs/compute.yaml
+  OS::TripleO::Controller::Net::SoftwareConfig: /home/stack/my_templates/nic-configs/controller.yaml
+
+parameter_defaults:
+  # Internal API used for private OpenStack Traffic
+  InternalApiNetCidr: .144.0/24
+  InternalApiAllocationPools: [{'start': '.144.10', 'end': '.144.200'}]
+
+  # External Networking Access - Public API Access
+  ExternalNetCidr: .148.0/24
+  # Leave room for floating IPs in the External allocation pool (if required)
+  ExternalAllocationPools:[{'start': '.148.10', 'end': '.148.200'}]
+  #Set to the router gateway on the external network
+  ExternalInterfaceDefaultRoute: .148.246
+
+  # Add in configuration for the Control Plane
+  ControlPlaneSubnetCidr: "24"
+  # Default gateway router on the provisioning network
+  ControlPlaneDefaultRoute: .152.1
+  # The IP address of the Undercloud
+  EC2MetadataIp: .152.1
+  DnsServers: ['.15.200', '.55.200']
+
+  # The bonding mode to use for the bonds
+  BondInterfaceOvsOptions: "bond_mode=balance-slb"
